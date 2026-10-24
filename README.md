@@ -42,6 +42,16 @@ cp .env.example .env
 
 Note that `uv run --env-file .env` loads the dev environment explicitly (no auto-loading).
 
+## Log Format
+
+Console (stderr) lines are compact, with three-letter level names (`TRC`, `DBG`, `INF`, `SUC`, `WRN`, `ERR`, `CRT`):
+
+```
+2026-10-24 19:45:00 | INF | second_brain.app:main:29 | Hello from second_brain!
+```
+
+The log file (`LOG_FILE`) keeps loguru's default format with milliseconds. See [docs/usage.md](docs/usage.md#log-format) for details.
+
 ## Testing
 
 Run tests:
