@@ -8,7 +8,9 @@ import pytest
 from second_brain.notes import (
     build_note_path,
     create_note,
+    list_note_files,
     notes_dir,
+    read_note,
     slugify,
 )
 
@@ -179,3 +181,30 @@ def test_create_note_multiple_duplicates(tmp_path):
     assert path1.is_file() and path2.is_file() and path3.is_file()
     assert path2.name.endswith("-1.md")
     assert path3.name.endswith("-2.md")
+
+
+# ---------------------------------------------------------------------------
+# read_note
+# ---------------------------------------------------------------------------
+
+
+def test_read_note_roundtrips_unicode(tmp_path):
+    path = create_note("Café über Ideen 日本", tmp_path, now=FIXED_NOW)
+    assert "# Café über Ideen 日本" in read_note(path)
+
+
+def test_read_note_is_utf8_regardless_of_locale(tmp_path):
+    """`read_note` must not depend on the platform's default encoding."""
+    path = tmp_path / "note.md"
+    path.write_bytes(b"# Caf\xc3\xa9\n")  # UTF-8 bytes, written explicitly
+    assert read_note(path) == "# Café\n"
+
+
+def test_list_note_files_newest_first_and_md_only(tmp_path):
+    (tmp_path / "2026-01-01-a.md").write_text("a")
+    (tmp_path / "2026-02-01-b.md").write_text("b")
+    (tmp_path / "ignore.txt").write_text("x")
+    assert [p.name for p in list_note_files(tmp_path)] == [
+        "2026-02-01-b.md",
+        "2026-01-01-a.md",
+    ]
