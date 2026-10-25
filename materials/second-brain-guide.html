@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 second-brain: Your Note-Taking Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        header h1 {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section h2 {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Overview Section */
+        .overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .overview-text h3 {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .overview-text p {
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .workflow {
+            background: #f8f9ff;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            font-size: 1.05em;
+        }
+
+        .step-icon {
+            font-size: 1.8em;
+            margin-right: 12px;
+            width: 40px;
+        }
+
+        .diagram {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flow-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            margin: 10px;
+        }
+
+        .flow-item.icon-top {
+            font-size: 2em;
+            padding-top: 15px;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #667eea;
+            margin: 0 -5px;
+        }
+
+        /* Commands Section */
+        .commands {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .command-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .command-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .command-card h3 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .command-card p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+
+        .command-card code {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            display: block;
+            margin-top: 10px;
+            font-size: 0.95em;
+            overflow-x: auto;
+        }
+
+        .command-card.new {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .command-card.list {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .command-card.show {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* File Explorer */
+        .explorer {
+            background: #f5f7fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .file-tree {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+
+        .file-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-item:hover {
+            background: #f0f4ff;
+            border-left-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .file-item.active {
+            background: #e8ecff;
+            border-left-color: #667eea;
+        }
+
+        .file-icon {
+            font-size: 1.3em;
+            width: 25px;
+        }
+
+        .file-path {
+            flex: 1;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .file-summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            min-height: 100px;
+            display: none;
+        }
+
+        .file-summary.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        .file-summary h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .file-summary p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .directory {
+            opacity: 0.7;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .overview {
+                grid-template-columns: 1fr;
+            }
+
+            .commands {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+                margin: 5px 0;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            header p {
+                font-size: 1em;
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            opacity: 0.8;
+            font-size: 0.95em;
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 second-brain</h1>
+            <p>Capture and organise your thoughts</p>
+        </header>
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>📖 What is second-brain?</h2>
+            <div class="overview">
+                <div class="overview-text">
+                    <h3>Your Personal Note-Taking Companion</h3>
+                    <p>A simple, elegant CLI tool that captures your ideas as <span class="highlight">plain markdown files</span>. No databases, no friction — just your thoughts saved in an organized way.</p>
+
+                    <div class="workflow">
+                        <div class="workflow-step">
+                            <span class="step-icon">💾</span>
+                            <span>Save notes with a single command</span>
+                        </div>
+                        <div class="workflow-step">
+                            <span class="step-icon">📋</span>
+                            <span>List all your notes instantly</span>
+                        </div>
+                        <div class="workflow-step">
+                            <span class="step-icon">👀</span>
+                            <span>View any note by its number</span>
+                        </div>
+                        <div class="workflow-step">
+                            <span class="step-icon">📁</span>
+                            <span>Stored as YYYY-MM-DD-slug.md</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="diagram">
+                    <h3>The Typical Workflow</h3>
+                    <div class="flow">
+                        <div class="flow-item">
+                            <div style="font-size: 1.5em; margin-bottom: 5px;">💡</div>
+                            <div>Have an Idea</div>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="flow-item">
+                            <div style="font-size: 1.5em; margin-bottom: 5px;">✍️</div>
+                            <div>Create Note</div>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="flow-item">
+                            <div style="font-size: 1.5em; margin-bottom: 5px;">🎯</div>
+                            <div>Review Later</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commands Section -->
+        <div class="section">
+            <h2>⚡ Three Essential Commands</h2>
+            <div class="commands">
+                <div class="command-card new">
+                    <h3>🆕 new</h3>
+                    <p>Create a new note with a title. Optionally add a multi-line body using <code style="display: inline; background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 3px;">--body</code> or read from stdin.</p>
+                    <p style="font-size: 0.9em; margin-top: 15px; font-weight: 600;">Examples:</p>
+                    <code>second_brain new "Caching idea"</code>
+                    <code style="margin-top: 8px;">second_brain new "Idea" --body "Details here"</code>
+                </div>
+
+                <div class="command-card list">
+                    <h3>📋 list</h3>
+                    <p>Show all your notes in numbered order, newest first. Perfect for seeing what you've captured lately.</p>
+                    <p style="font-size: 0.9em; margin-top: 15px; font-weight: 600;">Output:</p>
+                    <code>Notes: ~/second_brain/
+1. 2026-10-25-caching-idea.md
+2. 2026-10-24-design-pattern.md</code>
+                </div>
+
+                <div class="command-card show">
+                    <h3>👀 show</h3>
+                    <p>Display the full contents of a note by its number from the list. Numbers match the output of <code style="display: inline; background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 3px;">list</code>.</p>
+                    <p style="font-size: 0.9em; margin-top: 15px; font-weight: 600;">Example:</p>
+                    <code>second_brain show 1</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Structure Section -->
+        <div class="section">
+            <h2>📂 Code Structure</h2>
+            <p style="margin-bottom: 20px; color: #666;">Click any file to learn what it does:</p>
+            <div class="explorer">
+                <div class="file-tree">
+                    <div class="file-item directory" style="cursor: default; opacity: 1;">
+                        <span class="file-icon">📁</span>
+                        <span class="file-path">src/second_brain/</span>
+                    </div>
+
+                    <div class="file-item" onclick="showFile('init')">
+                        <span class="file-icon">🐍</span>
+                        <span class="file-path">&nbsp;&nbsp;&nbsp;&nbsp;__init__.py</span>
+                    </div>
+
+                    <div class="file-item" onclick="showFile('main')">
+                        <span class="file-icon">🚀</span>
+                        <span class="file-path">&nbsp;&nbsp;&nbsp;&nbsp;__main__.py</span>
+                    </div>
+
+                    <div class="file-item" onclick="showFile('cli')">
+                        <span class="file-icon">💻</span>
+                        <span class="file-path">&nbsp;&nbsp;&nbsp;&nbsp;cli.py</span>
+                    </div>
+
+                    <div class="file-item" onclick="showFile('app')">
+                        <span class="file-icon">⚙️</span>
+                        <span class="file-path">&nbsp;&nbsp;&nbsp;&nbsp;app.py</span>
+                    </div>
+
+                    <div class="file-item" onclick="showFile('notes')">
+                        <span class="file-icon">📝</span>
+                        <span class="file-path">&nbsp;&nbsp;&nbsp;&nbsp;notes.py</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="summary" class="file-summary">
+                <!-- File summaries will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Getting Started Section -->
+        <div class="section">
+            <h2>🚀 Getting Started</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="padding: 20px; background: #f8f9ff; border-radius: 10px; border-left: 4px solid #667eea;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">1️⃣ Installation</h3>
+                    <code style="display: block; background: white; padding: 10px; border-radius: 5px; margin-top: 10px;">uv sync</code>
+                </div>
+
+                <div style="padding: 20px; background: #f8f9ff; border-radius: 10px; border-left: 4px solid #667eea;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">2️⃣ Configure (Optional)</h3>
+                    <code style="display: block; background: white; padding: 10px; border-radius: 5px; margin-top: 10px;">cp .env.example .env</code>
+                </div>
+
+                <div style="padding: 20px; background: #f8f9ff; border-radius: 10px; border-left: 4px solid #667eea;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">3️⃣ Start Using!</h3>
+                    <code style="display: block; background: white; padding: 10px; border-radius: 5px; margin-top: 10px;">uv run second_brain new "My idea"</code>
+                </div>
+            </div>
+
+            <div style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-radius: 10px;">
+                <h3 style="color: #764ba2; margin-bottom: 10px;">📍 Where are notes saved?</h3>
+                <p style="color: #555; margin: 10px 0;">By default: <code style="background: white; padding: 2px 6px; border-radius: 3px;">~/second_brain/</code></p>
+                <p style="color: #555; font-size: 0.95em;">You can change it by setting the <code style="background: white; padding: 2px 6px; border-radius: 3px;">SECOND_BRAIN_DIR</code> environment variable.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>🎉 Happy note-taking! Your thoughts deserve to be captured.</p>
+            <div class="badges">
+                <span class="badge">🐍 Python CLI</span>
+                <span class="badge">📝 Markdown Notes</span>
+                <span class="badge">⚡ Zero Friction</span>
+                <span class="badge">💾 Plain Files</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const fileSummaries = {
+            init: {
+                name: '__init__.py',
+                summary: '<h4>Package Initialization</h4><p>An empty init file that marks the <code>second_brain</code> directory as a Python package. This allows the module to be imported properly.</p>'
+            },
+            main: {
+                name: '__main__.py',
+                summary: '<h4>Entry Point for Module Execution</h4><p>Enables running the app with <code>python -m second_brain</code>. It simply imports and calls the <code>cli()</code> function from <code>cli.py</code>.</p><p style="font-size: 0.9em; margin-top: 10px;"><strong>Key role:</strong> Bridges between module execution and the CLI command router.</p>'
+            },
+            cli: {
+                name: 'cli.py',
+                summary: '<h4>Command-Line Interface Router</h4><p>The heart of the user-facing commands. Built with <strong>Click</strong>, it defines three commands:</p><ul style="margin: 10px 0 10px 20px; color: #555;"><li><code style="background: #f0f0f0; padding: 2px 4px;">new</code> — create notes</li><li><code style="background: #f0f0f0; padding: 2px 4px;">list</code> — show all notes</li><li><code style="background: #f0f0f0; padding: 2px 4px;">show</code> — display a note</li></ul><p style="font-size: 0.9em; margin-top: 10px;"><strong>Responsibility:</strong> Parse arguments, handle validation, call business logic from <code>notes.py</code>.</p>'
+            },
+            app: {
+                name: 'app.py',
+                summary: '<h4>Logging Configuration</h4><p>Sets up structured logging for the entire application using <strong>loguru</strong>. Handles:</p><ul style="margin: 10px 0 10px 20px; color: #555;"><li>📋 Compact console output (stderr) with 3-letter level names (TRC, DBG, INF, etc.)</li><li>📁 Detailed file logging for debugging</li><li>⚙️ Log level configuration via environment variables</li></ul><p style="font-size: 0.9em; margin-top: 10px;"><strong>Key function:</strong> <code>configure_logging()</code> is called at app startup.</p>'
+            },
+            notes: {
+                name: 'notes.py',
+                summary: '<h4>Business Logic & File Operations</h4><p>The workhorse module containing all the core functions:</p><ul style="margin: 10px 0 10px 20px; color: #555;"><li><code style="background: #f0f0f0; padding: 2px 4px;">slugify()</code> — converts titles to safe filenames</li><li><code style="background: #f0f0f0; padding: 2px 4px;">create_note()</code> — writes markdown files with timestamp</li><li><code style="background: #f0f0f0; padding: 2px 4px;">list_note_files()</code> — retrieves notes sorted newest-first</li><li><code style="background: #f0f0f0; padding: 2px 4px;">read_note()</code> — reads file contents</li></ul><p style="font-size: 0.9em; margin-top: 10px;"><strong>Key detail:</strong> Notes are stored as <code>YYYY-MM-DD-slug.md</code> with ISO timestamp footers.</p>'
+            }
+        };
+
+        function showFile(fileKey) {
+            const summary = fileSummaries[fileKey];
+            const summaryEl = document.getElementById('summary');
+
+            // Remove active state from all items
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add active state to clicked item
+            event.target.closest('.file-item').classList.add('active');
+
+            summaryEl.innerHTML = summary.summary;
+            summaryEl.classList.add('show');
+        }
+
+        // Trigger first file on load
+        window.addEventListener('load', () => {
+            document.querySelector('.file-item').click();
+        });
+    </script>
+</body>
+</html>
