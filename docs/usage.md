@@ -59,7 +59,7 @@ Every command describes itself, with examples, so people and agents can
 discover how to use it without reading the docs:
 
 ```bash
-uv run second_brain --help          # overview, workflow, environment variable
+uv run second_brain --help          # overview, workflow, environment variables
 uv run second_brain new --help      # titles, --body, stdin, multi-line examples
 uv run second_brain list --help
 uv run second_brain show --help     # numbering and error behaviour
@@ -73,7 +73,7 @@ lines and errors go to stderr, so stdout can be piped or captured safely.
 | Variable           | Default            | Description                        |
 |--------------------|--------------------|------------------------------------|
 | `LOG_LEVEL`        | `INFO`             | Console log level (DEBUG, INFO, …) |
-| `LOG_FILE`         | `app.log`          | Path to the log file               |
+| `LOG_FILE`         | `app.log`          | Log file, see [Log file](#log-file) |
 | `SECOND_BRAIN_DIR` | `~/second_brain/`  | Directory where notes are stored   |
 
 Copy `.env.example` to `.env` for development defaults, then run with `uv run --env-file .env`.
@@ -104,3 +104,26 @@ colorized when stderr is a terminal and plain otherwise (e.g. when piped).
 
 The log file (`LOG_FILE`) keeps loguru's default, more detailed format with
 milliseconds and full level names.
+
+## Log file
+
+The log file is written to a fixed per-user log directory, no matter where you
+run the command from:
+
+| Platform | Default location                                                      |
+|----------|-----------------------------------------------------------------------|
+| macOS    | `~/Library/Logs/second_brain/app.log`                                 |
+| Linux    | `~/.local/state/second_brain/log/app.log` (`$XDG_STATE_HOME/second_brain/log/app.log` if set) |
+| Windows  | `%LOCALAPPDATA%\second_brain\Logs\app.log`                            |
+
+`LOG_FILE` overrides the file name or location:
+
+- A relative path (`dev.log`, `sub/dev.log`) is resolved against the log directory.
+- An absolute path is used as is.
+- `~` is expanded first, like `SECOND_BRAIN_DIR`.
+- An empty `LOG_FILE=` counts as unset.
+
+Missing directories are created automatically. The file rotates when it
+reaches 10 MB, and rotated files older than 14 days are deleted. Retention only
+runs at rotation time, so the live `app.log` can hold older entries until it
+reaches 10 MB.

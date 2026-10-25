@@ -40,6 +40,8 @@ flowchart LR
 
     subgraph app_py["app.py — logging setup"]
         configure_logging("configure_logging()")
+        log_file_path("log_file_path()")
+        default_log_dir("default_log_dir()")
         stderr_format("stderr_format()")
         level_names[/"LEVEL_SHORT_NAMES"/]
         app_main("main()<br/>@logger.catch<br/>(not used by the CLI)")
@@ -48,11 +50,12 @@ flowchart LR
     subgraph thirdparty["Third-party"]
         lib_click{{"click"}}
         lib_loguru{{"loguru"}}
+        lib_platformdirs{{"platformdirs"}}
     end
 
     subgraph stdlib["Standard library"]
         std_notes{{"os · re · unicodedata<br/>datetime · pathlib"}}
-        std_app{{"sys · os"}}
+        std_app{{"sys · os · pathlib"}}
     end
 
     %% Entry points
@@ -65,6 +68,7 @@ flowchart LR
     cli_py ==> lib_click
     cli_py ==> lib_loguru
     app_py ==> lib_loguru
+    app_py ==> lib_platformdirs
     notes_py ==> std_notes
     app_py ==> std_app
 
@@ -86,6 +90,8 @@ flowchart LR
     split_title_body -.-> clean_block
     build_note_path -.-> slugify
     app_main -.-> configure_logging
+    configure_logging -.-> log_file_path
+    log_file_path -.-> default_log_dir
     configure_logging -.-> stderr_format
     stderr_format -.-> level_names
 ```
@@ -143,14 +149,14 @@ flowchart LR
 
     subgraph storage["Filesystem"]
         notes_store[("notes directory<br/>YYYY-MM-DD-slug.md")]
-        log_file[("log file<br/>DEBUG, rotates at 50 KB")]
+        log_file[("log file<br/>DEBUG, rotates at 10 MB, keeps 14 days")]
         stderr_sink[("stderr<br/>compact log lines")]
     end
 
     subgraph env["Environment variables"]
         env_dir[/"SECOND_BRAIN_DIR<br/>default: ~/second_brain/"/]
         env_level[/"LOG_LEVEL<br/>default: INFO"/]
-        env_file[/"LOG_FILE<br/>default: app.log"/]
+        env_file[/"LOG_FILE<br/>default: app.log in per-user log dir"/]
     end
 
     console --> root
