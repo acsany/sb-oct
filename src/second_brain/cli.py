@@ -15,7 +15,10 @@ def cli():
 
     Notes are plain markdown files, stored in the directory named by the
     SECOND_BRAIN_DIR environment variable (default: ~/second_brain/).
-    Commands print their result on stdout; log lines go to stderr.
+    Commands print their result on stdout; log lines go to stderr. They also
+    go to the log file LOG_FILE, which defaults to app.log in the per-user log
+    directory: ~/Library/Logs/second_brain/ on macOS,
+    ~/.local/state/second_brain/log/ on Linux.
 
     \b
     Typical workflow:

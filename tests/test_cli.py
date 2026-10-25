@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from click.testing import CliRunner
+from loguru import logger
 
 from second_brain.cli import cli
 
@@ -345,3 +346,27 @@ def test_cli_show_help_explains_number_and_errors():
     assert "second_brain list" in out
     assert "exit" in out.lower()
     assert "stderr" in out
+
+
+# ---------------------------------------------------------------------------
+# Log file location
+# ---------------------------------------------------------------------------
+
+
+def test_cli_writes_log_to_log_dir_not_cwd(
+    tmp_note_dir, tmp_log_dir, tmp_path, monkeypatch
+):
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    result = runner.invoke(cli, ["new", "Logged idea"])
+    logger.remove()
+    assert result.exit_code == 0
+    assert "Created note" in (tmp_log_dir / "app.log").read_text()
+    assert not (cwd / "app.log").exists()
+
+
+def test_cli_group_help_mentions_log_file():
+    result = runner.invoke(cli, ["--help"])
+    assert "LOG_FILE" in result.output
+    assert "~/Library/Logs/second_brain/" in result.output
