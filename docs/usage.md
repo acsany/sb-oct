@@ -22,6 +22,20 @@ Notes are plain markdown files named `YYYY-MM-DD-<slug>.md`. Each contains the
 title as a heading followed by an ISO timestamp. If a file with that name
 already exists, `-1`, `-2`, … is appended instead of overwriting it.
 
+### Multi-line notes
+
+Add a body with `--body` (short: `-b`), or `--body -` to read it from stdin:
+
+```bash
+uv run second_brain new "Caching idea" --body $'Use an LRU.\n\nCheck memory limits.'
+cat draft.md | uv run second_brain new "Draft" --body -
+```
+
+If the title contains newlines, only its first line is used as the heading and
+the filename slug; the remaining lines are put at the start of the body. `\r\n`
+line endings are normalised to `\n`. The note is written as the heading, the
+body (if any) and the timestamp, separated by blank lines.
+
 With dev settings loaded:
 
 ```bash

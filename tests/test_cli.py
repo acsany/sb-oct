@@ -251,3 +251,48 @@ def test_cli_show_matches_list_numbering(tmp_note_dir):
     for n, heading in [(1, "# C"), (2, "# B"), (3, "# A")]:
         assert f"{n}. " in listing
         assert heading in runner.invoke(cli, ["show", str(n)]).output
+
+
+# ---------------------------------------------------------------------------
+# multi-line notes
+# ---------------------------------------------------------------------------
+
+
+def test_cli_new_body_option(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Idea", "--body", "line1\nline2"])
+    assert result.exit_code == 0
+    text = next(tmp_note_dir.glob("*.md")).read_text()
+    assert text.startswith("# Idea\n\nline1\nline2\n\n")
+
+
+def test_cli_new_body_from_stdin(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Idea", "--body", "-"], input="a\nb\n")
+    assert result.exit_code == 0
+    text = next(tmp_note_dir.glob("*.md")).read_text()
+    assert text.startswith("# Idea\n\na\nb\n\n")
+
+
+def test_cli_new_without_body_does_not_read_stdin(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Idea"], input="ignored\n")
+    assert result.exit_code == 0
+    assert "ignored" not in next(tmp_note_dir.glob("*.md")).read_text()
+
+
+def test_cli_new_multiline_title_is_split(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Head\n\nTail text"])
+    assert result.exit_code == 0
+    note = next(tmp_note_dir.glob("*.md"))
+    assert note.name.endswith("-head.md")
+    assert note.read_text().startswith("# Head\n\nTail text\n\n")
+
+
+def test_cli_new_multiline_note_roundtrips_through_show(tmp_note_dir):
+    runner.invoke(cli, ["new", "Head", "--body", "p1\n\np2"])
+    result = runner.invoke(cli, ["show", "1"])
+    assert "# Head" in result.output
+    assert "p1\n\np2" in result.output
+
+
+def test_cli_new_help_mentions_body():
+    result = runner.invoke(cli, ["new", "--help"])
+    assert "--body" in result.output
