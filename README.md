@@ -41,6 +41,8 @@ Via the Python module:
 uv run python -m second_brain new "My brilliant idea"
 ```
 
+The CLI documents itself, including examples. Start with `uv run second_brain --help`, then `uv run second_brain <command> --help` (`new`, `list`, `show`). Results go to stdout and log lines to stderr, so output can be piped or captured safely.
+
 ## Environment Variables
 
 `.env.example` is the template — copy it to `.env` for development:

@@ -53,6 +53,21 @@ the note filenames, newest first. `show N` prints the content of note `N` from t
 unknown number, an empty or missing notes directory exits with status 1 and an
 error on stderr.
 
+## Built-in help
+
+Every command describes itself, with examples, so people and agents can
+discover how to use it without reading the docs:
+
+```bash
+uv run second_brain --help          # overview, workflow, environment variable
+uv run second_brain new --help      # titles, --body, stdin, multi-line examples
+uv run second_brain list --help
+uv run second_brain show --help     # numbering and error behaviour
+```
+
+Command results (paths, listings, note contents) are written to stdout; log
+lines and errors go to stderr, so stdout can be piped or captured safely.
+
 ## Environment Variables
 
 | Variable           | Default            | Description                        |
