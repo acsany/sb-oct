@@ -11,10 +11,11 @@ uv sync
 
 ## Usage
 
-The CLI exposes one subcommand so far:
+The CLI exposes two subcommands so far:
 
 ```bash
 uv run second_brain new "My brilliant idea"   # save a note as markdown
+uv run second_brain list                      # list notes (newest first)
 ```
 
 Notes are plain markdown files named `YYYY-MM-DD-<slug>.md`, each starting with the title as a heading and a timestamp.

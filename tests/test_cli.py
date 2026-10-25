@@ -98,3 +98,69 @@ def test_cli_new_folds_accents_in_filename(tmp_note_dir):
     result = runner.invoke(cli, ["new", "Café über Ideen"])
     assert result.exit_code == 0
     assert "cafe-uber-ideen" in next(tmp_note_dir.glob("*.md")).name
+
+
+# ---------------------------------------------------------------------------
+# list subcommand
+# ---------------------------------------------------------------------------
+
+
+def test_cli_list_shows_directory_header(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260322-note.md").write_text("# Note\n")
+    result = runner.invoke(cli, ["list"])
+    assert result.exit_code == 0
+    assert f"Notes: {tmp_note_dir}" in result.output
+
+
+def test_cli_list_shows_numbered_files(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260320-a.md").write_text("# A\n")
+    (tmp_note_dir / "20260321-b.md").write_text("# B\n")
+    (tmp_note_dir / "20260322-c.md").write_text("# C\n")
+    result = runner.invoke(cli, ["list"])
+    assert result.exit_code == 0
+    assert "1." in result.output
+    assert "2." in result.output
+    assert "3." in result.output
+
+
+def test_cli_list_sorted_newest_first(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260320-old.md").write_text("# Old\n")
+    (tmp_note_dir / "20260322-new.md").write_text("# New\n")
+    result = runner.invoke(cli, ["list"])
+    assert result.exit_code == 0
+    lines = result.output.strip().splitlines()
+    numbered = [ln for ln in lines if re.match(r"^\d+\.", ln)]
+    assert "20260322-new.md" in numbered[0]
+    assert "20260320-old.md" in numbered[1]
+
+
+def test_cli_list_empty_directory(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    result = runner.invoke(cli, ["list"])
+    assert result.exit_code == 0
+    assert "No notes found" in result.output
+
+
+def test_cli_list_missing_directory(tmp_note_dir):
+    result = runner.invoke(cli, ["list"])
+    assert result.exit_code == 0
+    assert "does not exist" in result.output
+
+
+def test_cli_list_ignores_non_md_files(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260322-note.md").write_text("# Note\n")
+    (tmp_note_dir / "20260322-other.txt").write_text("not a note\n")
+    result = runner.invoke(cli, ["list"])
+    assert result.exit_code == 0
+    assert "20260322-note.md" in result.output
+    assert "20260322-other.txt" not in result.output
+
+
+def test_cli_list_help():
+    result = runner.invoke(cli, ["list", "--help"])
+    assert result.exit_code == 0
+    assert "List" in result.output or "list" in result.output
