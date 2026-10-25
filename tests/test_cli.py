@@ -296,3 +296,52 @@ def test_cli_new_multiline_note_roundtrips_through_show(tmp_note_dir):
 def test_cli_new_help_mentions_body():
     result = runner.invoke(cli, ["new", "--help"])
     assert "--body" in result.output
+
+
+# ---------------------------------------------------------------------------
+# help text (the CLI's own documentation, for people and agents)
+# ---------------------------------------------------------------------------
+
+
+def test_cli_group_help_lists_commands_and_env_vars():
+    out = runner.invoke(cli, ["--help"]).output
+    for command in ("new", "list", "show"):
+        assert command in out
+    assert "SECOND_BRAIN_DIR" in out
+    assert "~/second_brain" in out
+    assert "stderr" in out
+
+
+def test_cli_group_help_has_workflow_example():
+    out = runner.invoke(cli, ["--help"]).output
+    assert 'second_brain new "' in out
+    assert "second_brain list" in out
+    assert "second_brain show 1" in out
+
+
+def test_cli_new_help_has_multiline_examples():
+    out = runner.invoke(cli, ["new", "--help"]).output
+    assert "Examples:" in out
+    assert "--body $'" in out
+    assert "--body -" in out
+    assert "stdout" in out
+
+
+def test_cli_new_help_keeps_example_line_breaks():
+    out = runner.invoke(cli, ["new", "--help"]).output
+    lines = [ln.strip() for ln in out.splitlines()]
+    assert any(ln.startswith("second_brain new ") for ln in lines)
+    assert any(ln.startswith("cat ") and "--body -" in ln for ln in lines)
+
+
+def test_cli_list_help_explains_numbering():
+    out = runner.invoke(cli, ["list", "--help"]).output
+    assert "newest first" in out
+    assert "show" in out
+
+
+def test_cli_show_help_explains_number_and_errors():
+    out = runner.invoke(cli, ["show", "--help"]).output
+    assert "second_brain list" in out
+    assert "exit" in out.lower()
+    assert "stderr" in out
