@@ -10,25 +10,35 @@ uv sync
 
 ## Running
 
-Via the CLI entrypoint:
+The CLI exposes one subcommand so far:
 
 ```bash
-uv run second_brain                          # production defaults
-uv run --env-file .env second_brain          # dev settings
+uv run second_brain new "My brilliant idea"   # save a note as markdown
+```
+
+Notes are plain markdown files named `YYYY-MM-DD-<slug>.md`. Each contains the
+title as a heading followed by an ISO timestamp. If a file with that name
+already exists, `-1`, `-2`, … is appended instead of overwriting it.
+
+With dev settings loaded:
+
+```bash
+uv run --env-file .env second_brain new "My brilliant idea"
 ```
 
 Or as a Python module:
 
 ```bash
-uv run python -m second_brain
+uv run python -m second_brain new "My brilliant idea"
 ```
 
 ## Environment Variables
 
-| Variable    | Default    | Description                          |
-|-------------|------------|--------------------------------------|
-| `LOG_LEVEL` | `INFO`     | Console log level (DEBUG, INFO, …)   |
-| `LOG_FILE`  | `app.log`  | Path to the log file                 |
+| Variable           | Default            | Description                        |
+|--------------------|--------------------|------------------------------------|
+| `LOG_LEVEL`        | `INFO`             | Console log level (DEBUG, INFO, …) |
+| `LOG_FILE`         | `app.log`          | Path to the log file               |
+| `SECOND_BRAIN_DIR` | `~/second_brain/`  | Directory where notes are stored   |
 
 Copy `.env.example` to `.env` for development defaults, then run with `uv run --env-file .env`.
 
