@@ -10,7 +10,20 @@ uv sync
 
 ## Running
 
-The CLI exposes three subcommands so far:
+Run `second_brain` with no arguments to open the interactive TUI:
+
+```bash
+uv run second_brain
+```
+
+The left sidebar lists your notes (newest first) with a **Create** button at
+the bottom. Selecting a note shows it read-only in the markdown editor on the
+right. **Create** switches the editor to edit mode and shows **Save** and
+**Cancel**: Save writes `YYYY-MM-DD-<slug>.md` (slug from the first line) and
+refreshes the list, Cancel discards the draft. Press `q` to quit. While the TUI
+runs, logs go to the log file only.
+
+The subcommands are still available:
 
 ```bash
 uv run second_brain new "My brilliant idea"   # save a note as markdown

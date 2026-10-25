@@ -14,6 +14,7 @@ uv sync
 The CLI exposes three subcommands so far:
 
 ```bash
+uv run second_brain                           # open the TUI (note list + markdown editor)
 uv run second_brain new "My brilliant idea"   # save a note as markdown
 uv run second_brain new "Title" --body "More text"  # note with a multi-line body
 uv run second_brain list                      # list notes (newest first)
