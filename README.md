@@ -52,7 +52,7 @@ cp .env.example .env
 ```
 
 - `LOG_LEVEL` — default: `INFO`. Set to `DEBUG` in `.env` for verbose console output.
-- `LOG_FILE` — default: `app.log`. Path to the log file.
+- `LOG_FILE` — default: `app.log` in the per-user log directory. Relative paths resolve against that directory; absolute paths and `~` are used as is.
 - `SECOND_BRAIN_DIR` — default: `~/second_brain/`. Directory where notes are stored.
 
 Note that `uv run --env-file .env` loads the dev environment explicitly (no auto-loading).
@@ -66,6 +66,8 @@ Console (stderr) lines are compact, with three-letter level names (`TRC`, `DBG`,
 ```
 
 The log file (`LOG_FILE`) keeps loguru's default format with milliseconds. See [docs/usage.md](docs/usage.md#log-format) for details.
+
+The log file lives in a per-user log directory (`~/Library/Logs/second_brain/` on macOS, `~/.local/state/second_brain/log/` on Linux), so it doesn't depend on the working directory. It rotates at 10 MB and rotated files are kept for 14 days.
 
 ## Testing
 

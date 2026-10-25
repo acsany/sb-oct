@@ -9,7 +9,7 @@
 - Always write tests first when implementing features or fixing bugs (TDD).
 - Before committing, ensure docs and `README.md` are updated.
 - When creating new pages in `docs/`, also add them to the nav: section in `mkdocs.yml`.
-- Always check log files when debugging.
+- Always check log files when debugging. The app log is `~/Library/Logs/second_brain/app.log` on macOS.
 
 ## Notes
 
