@@ -11,6 +11,7 @@ requires-python = ">=3.13"
 dependencies = [
     "click>=8.1,<9",
     "loguru",
+    "platformdirs>=4.13.5",
 ]
 
 [project.scripts]

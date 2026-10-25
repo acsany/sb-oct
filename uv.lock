@@ -789,6 +789,7 @@ source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "loguru" },
+    { name = "platformdirs" },
 ]
 
 [package.dev-dependencies]
@@ -806,6 +807,7 @@ dev = [
 requires-dist = [
     { name = "click", specifier = ">=8.1,<9" },
     { name = "loguru" },
+    { name = "platformdirs", specifier = ">=4.13.5" },
 ]
 
 [package.metadata.requires-dev]
