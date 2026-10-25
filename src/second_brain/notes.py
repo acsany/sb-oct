@@ -57,16 +57,52 @@ def build_note_path(title: str, base_dir: Path, note_date: date) -> Path:
     return candidate
 
 
+def _clean_block(text: str) -> str:
+    """Drop leading blank lines and trailing whitespace; blank text becomes ``""``."""
+    return text.lstrip("\n").rstrip()
+
+
+def split_title_body(title: str, body: str | None = None) -> tuple[str, str]:
+    """Split raw user input into a single-line heading and a body.
+
+    Line endings (`\\r\\n`, `\\r`) are normalised to `\\n`. The first non-blank
+    line of `title` is the heading; any further lines of `title` become the start
+    of the body, followed by the explicit `body`, separated by a blank line.
+
+    Args:
+        title: The title argument, which may contain newlines.
+        body: Optional extra body text.
+
+    Returns:
+        A `(title, body)` tuple. Either part may be empty; the body never has
+            leading blank lines or trailing whitespace.
+    """
+    lines = title.replace("\r\n", "\n").replace("\r", "\n").lstrip("\n").split("\n")
+    heading = lines[0].strip()
+    parts = [_clean_block("\n".join(lines[1:]))]
+    if body is not None:
+        parts.append(_clean_block(body.replace("\r\n", "\n").replace("\r", "\n")))
+    return heading, "\n\n".join(p for p in parts if p)
+
+
 def create_note(
     title: str,
     base_dir: Path,
     now: datetime | None = None,
+    body: str | None = None,
 ) -> Path:
-    """Create a markdown note file and return its absolute path."""
+    """Create a markdown note file and return its absolute path.
+
+    The note is `# <heading>`, the optional body, then an ISO timestamp. A
+    multi-line `title` is split with `split_title_body`, so a newline can never
+    leak into the heading or the filename.
+    """
     now = now or datetime.now()
-    path = build_note_path(title, base_dir, now.date())
+    heading, text = split_title_body(title, body)
+    path = build_note_path(heading, base_dir, now.date())
     timestamp = now.replace(microsecond=0).isoformat()
-    content = f"# {title}\n\n{timestamp}\n"
+    sections = [f"# {heading}", text, timestamp]
+    content = "\n\n".join(s for s in sections if s) + "\n"
     path.write_text(content, encoding="utf-8")
     return path.resolve()
 

@@ -17,11 +17,23 @@ def cli():
 
 @cli.command()
 @click.argument("title")
-def new(title: str):
-    """Create a new note with the given TITLE."""
+@click.option(
+    "--body",
+    "-b",
+    help="Note body (multi-line). Use '-' to read it from stdin.",
+)
+def new(title: str, body: str | None):
+    """Create a new note with the given TITLE.
+
+    If TITLE contains newlines, the first line becomes the heading and the rest
+    is added to the note body.
+    """
+    if body == "-":
+        with click.open_file("-", encoding="utf-8") as stdin:
+            body = stdin.read()
     base_dir = notes_dir()
     logger.debug("Creating note in {}", base_dir)
-    path = create_note(title, base_dir)
+    path = create_note(title, base_dir, body=body)
     logger.info("Created note: {}", path)
     click.echo(path)
 

@@ -15,11 +15,19 @@ The CLI exposes three subcommands so far:
 
 ```bash
 uv run second_brain new "My brilliant idea"   # save a note as markdown
+uv run second_brain new "Title" --body "More text"  # note with a multi-line body
 uv run second_brain list                      # list notes (newest first)
 uv run second_brain show 1                    # print the contents of note 1
 ```
 
-Notes are plain markdown files named `YYYY-MM-DD-<slug>.md`, each starting with the title as a heading and a timestamp.
+Notes are plain markdown files named `YYYY-MM-DD-<slug>.md`, each starting with the title as a heading, then the optional body, then a timestamp.
+
+Multi-line notes: pass `--body` (or `-b`), or `--body -` to read the body from stdin. If the title itself contains newlines, its first line is the heading and the rest is added to the body:
+
+```bash
+uv run second_brain new "Caching idea" --body $'Use an LRU.\n\nCheck memory limits.'
+cat draft.md | uv run second_brain new "Draft" --body -
+```
 
 With the dev environment:
 

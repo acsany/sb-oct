@@ -12,6 +12,7 @@ from second_brain.notes import (
     notes_dir,
     read_note,
     slugify,
+    split_title_body,
 )
 
 # ---------------------------------------------------------------------------
@@ -208,3 +209,83 @@ def test_list_note_files_newest_first_and_md_only(tmp_path):
         "2026-02-01-b.md",
         "2026-01-01-a.md",
     ]
+
+
+# ---------------------------------------------------------------------------
+# multi-line titles and bodies
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("raw_title", "body", "expected"),
+    [
+        ("Title", None, ("Title", "")),
+        ("Title", "Body", ("Title", "Body")),
+        ("Title\nrest", None, ("Title", "rest")),
+        ("Title\n\nrest", None, ("Title", "rest")),
+        ("Title\r\nrest\r\nmore", None, ("Title", "rest\nmore")),
+        ("Title\rrest", None, ("Title", "rest")),
+        ("\n\n  Title  \nrest", None, ("Title", "rest")),
+        ("Title\nrest", "Body", ("Title", "rest\n\nBody")),
+        ("Title", "line1\r\nline2\n", ("Title", "line1\nline2")),
+        ("", None, ("", "")),
+        ("Title", "   \n ", ("Title", "")),
+    ],
+    ids=[
+        "single_line",
+        "explicit_body",
+        "newline_in_title",
+        "blank_line_in_title",
+        "crlf_in_title",
+        "cr_in_title",
+        "leading_blank_lines_stripped",
+        "title_rest_plus_body",
+        "crlf_body_normalised",
+        "empty",
+        "blank_body_dropped",
+    ],
+)
+def test_split_title_body(raw_title, body, expected):
+    assert split_title_body(raw_title, body) == expected
+
+
+def test_create_note_multiline_title_splits_heading_and_body(tmp_path):
+    path = create_note("First line\n\nsecond paragraph", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == (
+        "# First line\n\nsecond paragraph\n\n2026-03-22T14:30:00\n"
+    )
+
+
+def test_create_note_slug_uses_first_line_only(tmp_path):
+    path = create_note("First line\nsecond line", tmp_path, now=FIXED_NOW)
+    assert path.name == "2026-03-22-first-line.md"
+
+
+def test_create_note_with_body(tmp_path):
+    path = create_note("Idea", tmp_path, body="Some\nmore text", now=FIXED_NOW)
+    assert path.read_text() == "# Idea\n\nSome\nmore text\n\n2026-03-22T14:30:00\n"
+
+
+def test_create_note_without_body_is_unchanged(tmp_path):
+    path = create_note("Idea", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == "# Idea\n\n2026-03-22T14:30:00\n"
+
+
+def test_create_note_body_markdown_is_kept_verbatim(tmp_path):
+    body = "# Not the title\n\n- item\n```\ncode\n```"
+    path = create_note("Idea", tmp_path, body=body, now=FIXED_NOW)
+    assert body in path.read_text()
+    assert path.read_text().startswith("# Idea\n")
+
+
+def test_create_note_body_roundtrips_unicode(tmp_path):
+    path = create_note("Idea", tmp_path, body="Café 日本\nÜber", now=FIXED_NOW)
+    assert "Café 日本\nÜber" in read_note(path)
+
+
+def test_create_note_does_not_overwrite_when_body_differs(tmp_path):
+    path1 = create_note("Idea", tmp_path, body="one", now=FIXED_NOW)
+    path2 = create_note("Idea", tmp_path, body="two", now=FIXED_NOW)
+    assert path1 != path2
+    assert "one" in path1.read_text()
+    assert "two" in path2.read_text()
