@@ -164,3 +164,90 @@ def test_cli_list_help():
     result = runner.invoke(cli, ["list", "--help"])
     assert result.exit_code == 0
     assert "List" in result.output or "list" in result.output
+
+
+# ---------------------------------------------------------------------------
+# show subcommand
+# ---------------------------------------------------------------------------
+
+
+def test_cli_show_prints_file_content(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260322-note.md").write_text("# My Note\n\n2026-03-22T14:30:00\n")
+    result = runner.invoke(cli, ["show", "1"])
+    assert result.exit_code == 0
+    assert "# My Note" in result.output
+    assert "2026-03-22T14:30:00" in result.output
+
+
+def test_cli_show_correct_note_by_number(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260320-old.md").write_text("# Old\n")
+    (tmp_note_dir / "20260322-new.md").write_text("# New\n")
+    result1 = runner.invoke(cli, ["show", "1"])
+    assert result1.exit_code == 0
+    assert "# New" in result1.output
+    result2 = runner.invoke(cli, ["show", "2"])
+    assert result2.exit_code == 0
+    assert "# Old" in result2.output
+
+
+def test_cli_show_out_of_range(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260322-a.md").write_text("# A\n")
+    (tmp_note_dir / "20260321-b.md").write_text("# B\n")
+    result = runner.invoke(cli, ["show", "99"])
+    assert result.exit_code != 0
+    assert "Note 99 not found" in result.output
+    assert "2 notes available" in result.output
+
+
+def test_cli_show_zero_index(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260322-note.md").write_text("# Note\n")
+    result = runner.invoke(cli, ["show", "0"])
+    assert result.exit_code != 0
+
+
+def test_cli_show_missing_directory(tmp_note_dir):
+    result = runner.invoke(cli, ["show", "1"])
+    assert result.exit_code != 0
+    assert "does not exist" in result.output
+
+
+def test_cli_show_empty_directory(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    result = runner.invoke(cli, ["show", "1"])
+    assert result.exit_code != 0
+    assert "No notes found" in result.output
+
+
+def test_cli_show_roundtrips_unicode_content(tmp_note_dir):
+    created = runner.invoke(cli, ["new", "Café über Ideen 日本"])
+    assert created.exit_code == 0
+    result = runner.invoke(cli, ["show", "1"])
+    assert result.exit_code == 0
+    assert "Café über Ideen 日本" in result.output
+
+
+def test_cli_show_help():
+    result = runner.invoke(cli, ["show", "--help"])
+    assert result.exit_code == 0
+    assert "NUMBER" in result.output
+
+
+def test_cli_show_missing_argument():
+    result = runner.invoke(cli, ["show"])
+    assert result.exit_code != 0
+    assert "Missing argument" in result.output
+
+
+def test_cli_show_matches_list_numbering(tmp_note_dir):
+    tmp_note_dir.mkdir(parents=True)
+    (tmp_note_dir / "20260320-a.md").write_text("# A\n")
+    (tmp_note_dir / "20260321-b.md").write_text("# B\n")
+    (tmp_note_dir / "20260322-c.md").write_text("# C\n")
+    listing = runner.invoke(cli, ["list"]).output
+    for n, heading in [(1, "# C"), (2, "# B"), (3, "# A")]:
+        assert f"{n}. " in listing
+        assert heading in runner.invoke(cli, ["show", str(n)]).output

@@ -69,3 +69,17 @@ def create_note(
     content = f"# {title}\n\n{timestamp}\n"
     path.write_text(content, encoding="utf-8")
     return path.resolve()
+
+
+def list_note_files(base_dir: Path) -> list[Path]:
+    """Return the markdown notes in `base_dir`, newest first.
+
+    `list` and `show` both number notes from this ordering, so the number
+    printed by `list` is the one `show` accepts.
+    """
+    return sorted(base_dir.glob("*.md"), reverse=True)
+
+
+def read_note(path: Path) -> str:
+    """Read a note's contents, matching the UTF-8 encoding used to write it."""
+    return path.read_text(encoding="utf-8")
