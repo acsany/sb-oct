@@ -76,22 +76,27 @@ def log_file_path() -> Path:
     return path if path.is_absolute() else default_log_dir() / path
 
 
-def configure_logging():
+def configure_logging(console: bool = True):
     """Configure loguru for console and file logging.
 
     Removes the default handler and sets up:
-    - stderr handler at LOG_LEVEL (default: INFO, configurable via env var),
+    - stderr handler (skipped when `console` is false, e.g. while the TUI owns
+      the terminal) at LOG_LEVEL (default: INFO, configurable via env var),
       using the compact `stderr_format`
     - File handler at DEBUG level writing to `log_file_path()` (by default
       `app.log` in the per-user log directory, which is created if missing),
       using loguru's default format, rotating at 10 MB and keeping rotated
       files for 14 days
+
+    Args:
+        console: Whether to log to stderr as well as the file.
     """
     log_level = os.environ.get("LOG_LEVEL", "INFO")
     log_file = log_file_path()
     log_file.parent.mkdir(parents=True, exist_ok=True)
     logger.remove()
-    logger.add(sys.stderr, level=log_level, format=stderr_format)
+    if console:
+        logger.add(sys.stderr, level=log_level, format=stderr_format)
     logger.add(log_file, level="DEBUG", rotation=LOG_ROTATION, retention=LOG_RETENTION)
 
 

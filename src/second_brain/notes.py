@@ -107,6 +107,28 @@ def create_note(
     return path.resolve()
 
 
+def save_note(content: str, base_dir: Path, now: datetime | None = None) -> Path:
+    """Write `content` as a new note, verbatim, and return its absolute path.
+
+    The filename slug comes from the first non-blank line, with any leading
+    markdown `#` marks removed. Existing notes are never overwritten.
+
+    Args:
+        content: The full markdown text of the note.
+        base_dir: The notes directory; created if missing.
+        now: Timestamp used for the filename date. Defaults to the current time.
+
+    Returns:
+        The absolute path of the written file.
+    """
+    now = now or datetime.now()
+    first_line = next((ln for ln in content.splitlines() if ln.strip()), "")
+    title = first_line.lstrip("#").strip()
+    path = build_note_path(title, base_dir, now.date())
+    path.write_text(content.rstrip() + "\n", encoding="utf-8")
+    return path.resolve()
+
+
 def list_note_files(base_dir: Path) -> list[Path]:
     """Return the markdown notes in `base_dir`, newest first.
 

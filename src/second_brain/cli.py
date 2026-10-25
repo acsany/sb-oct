@@ -7,11 +7,16 @@ from loguru import logger
 
 from second_brain.app import configure_logging
 from second_brain.notes import create_note, list_note_files, notes_dir, read_note
+from second_brain.tui import SecondBrainApp
 
 
-@click.group()
-def cli():
+@click.group(invoke_without_command=True)
+@click.pass_context
+def cli(ctx: click.Context):
     """second_brain -- capture and organise your thoughts.
+
+    Run without a command to open the interactive TUI: a note list on the left,
+    a markdown editor on the right.
 
     Notes are plain markdown files, stored in the directory named by the
     SECOND_BRAIN_DIR environment variable (default: ~/second_brain/).
@@ -28,6 +33,11 @@ def cli():
 
     Run `second_brain COMMAND --help` for details and examples.
     """
+    if ctx.invoked_subcommand is None:
+        # The TUI owns the terminal, so log to the file only.
+        configure_logging(console=False)
+        SecondBrainApp().run()
+        return
     configure_logging()
 
 

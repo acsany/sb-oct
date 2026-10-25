@@ -289,3 +289,21 @@ def test_create_note_does_not_overwrite_when_body_differs(tmp_path):
     assert path1 != path2
     assert "one" in path1.read_text()
     assert "two" in path2.read_text()
+
+
+def test_save_note_writes_content_verbatim_with_title_from_first_line(tmp_path):
+    from second_brain.notes import save_note
+
+    path = save_note("# My Idea\n\nBody text", tmp_path, now=datetime(2026, 1, 2, 3, 4))
+    assert path.name == "2026-01-02-my-idea.md"
+    assert path.read_text(encoding="utf-8") == "# My Idea\n\nBody text\n"
+
+
+def test_save_note_does_not_overwrite(tmp_path):
+    from second_brain.notes import save_note
+
+    now = datetime(2026, 1, 2)
+    first = save_note("Same", tmp_path, now=now)
+    second = save_note("Same", tmp_path, now=now)
+    assert first != second
+    assert len(list(tmp_path.glob("*.md"))) == 2
